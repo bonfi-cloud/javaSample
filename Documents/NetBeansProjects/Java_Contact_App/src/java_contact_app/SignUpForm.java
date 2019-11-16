@@ -5,7 +5,6 @@
  */
 package java_contact_app;
 
-
 import com.mysql.jdbc.integration.c3p0.MysqlConnectionTester;
 import java.awt.Image;
 import java.io.File;
@@ -13,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,8 +31,8 @@ public class SignUpForm extends javax.swing.JFrame {
     /**
      * Creates new form LoginForm
      */
-    
     String imagePth = null;
+
     public SignUpForm() {
         initComponents();
     }
@@ -416,7 +416,7 @@ public class SignUpForm extends javax.swing.JFrame {
 
     private void jCheckBoxShowPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxShowPassActionPerformed
         if (jCheckBoxShowPass.isSelected()) {
-            jPasswordField1.setEchoChar((char)0);
+            jPasswordField1.setEchoChar((char) 0);
 
         } else {
             jPasswordField1.setEchoChar('*');
@@ -450,112 +450,132 @@ public class SignUpForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jPasswordField5ActionPerformed
 
-    public boolean isUsernameExist(){
-        
-        return true;
+    public boolean isUsernameExist(String un) {
+
+        boolean UExist = false;
+        Connection con = MyConnection.getConnection();
+        PreparedStatement ps;
+        ResultSet rs;
+
+        try {
+            ps = con.prepareStatement("SELECT * FROM `user` WHERE `username` = ? ");
+            ps.setString(1, jTextFieldUsername1.getText());
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                //JOptionPane.showMessageDialog(null, "you are logged");
+                UExist = true;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return UExist;
     }
-    public ImageIcon resizePic(String picPath){
-        
-        ImageIcon myIm = new ImageIcon(picPath);
-        Image img = myIm.getImage().getScaledInstance(jLabelPic.getWidth(), jLabelPic.getHeight(),Image.SCALE_SMOOTH);
-        ImageIcon myPicture = new ImageIcon(img);
-        return myPicture;
-        
-    }
-    
+
+//    public ImageIcon resizePic(String picPath) {
+//
+//        ImageIcon myIm = new ImageIcon(picPath);
+//        Image img = myIm.getImage().getScaledInstance(jLabelPic.getWidth(), jLabelPic.getHeight(), Image.SCALE_SMOOTH);
+//        ImageIcon myPicture = new ImageIcon(img);
+//        return myPicture;
+//
+//    }
+
     private void jButtonBrowseImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseImageActionPerformed
-        JFileChooser filec = new JFileChooser();
-        filec.setCurrentDirectory(new File(System.getProperty("user.home")));
+
+        MyFunc mf = new MyFunc();
+       imagePth = mf.browseImage(jLabelPic);
         
-        //file extension
-        FileNameExtensionFilter fileFilter = new FileNameExtensionFilter(".Images","jpg","png","gif");
-        filec.addChoosableFileFilter(fileFilter);
         
-        int fileState = filec.showSaveDialog(null);
-        
-        //if the user select the file
-        
-        if(fileState == JFileChooser.APPROVE_OPTION){
-            
-            File selectedFile = filec.getSelectedFile();
-            String path = selectedFile.getAbsolutePath();
-            imagePth = path;
-            //display the image in the JLabel            
-           // jLabelPic.setIcon(new ImageIcon(path));
-            
-             //display the image in the JLabel using resize image
-             jLabelPic.setIcon(resizePic(path));
-            
-        }
-        // if the user cancel
-        
-        else if(fileState == JFileChooser.CANCEL_OPTION){
-            System.out.println("No Image Selected");
-        }
-        
+//JFileChooser filec = new JFileChooser();
+//        filec.setCurrentDirectory(new File(System.getProperty("user.home")));
+//
+//        //file extension
+//        FileNameExtensionFilter fileFilter = new FileNameExtensionFilter(".Images", "jpg", "png", "gif");
+//        filec.addChoosableFileFilter(fileFilter);
+
+//        int fileState = filec.showSaveDialog(null);
+//
+//        //if the user select the file
+//        if (fileState == JFileChooser.APPROVE_OPTION) {
+//
+//            File selectedFile = filec.getSelectedFile();
+//            String path = selectedFile.getAbsolutePath();
+//            imagePth = path;
+//            //display the image in the JLabel            
+//            // jLabelPic.setIcon(new ImageIcon(path));
+//
+//            //display the image in the JLabel using resize image
+//            jLabelPic.setIcon(resizePic(path));
+//
+//        } // if the user cancel
+//        else if (fileState == JFileChooser.CANCEL_OPTION) {
+//            System.out.println("No Image Selected");
+//        }
+
     }//GEN-LAST:event_jButtonBrowseImageActionPerformed
-    
-    public boolean verifData(){
+
+    public boolean verifData() {
         // if first name - last name - username - password are empty
-        if(jTextFieldFName.getText().equals("")&&jTextFieldLName.getText().equals("")
-                ||jTextFieldUsername1.getText().equals("")
-                ||String.valueOf(jPasswordField2.getPassword()).equals(""))
-        {
+        if (jTextFieldFName.getText().equals("") && jTextFieldLName.getText().equals("")
+                || jTextFieldUsername1.getText().equals("")
+                || String.valueOf(jPasswordField2.getPassword()).equals("")) {
             JOptionPane.showMessageDialog(null, "One or more fields are empty ");
             return false;
+        } //if passwords are different
+        else if (!String.valueOf(jPasswordField2.getPassword()).equals(String.valueOf(jPasswordField5.getPassword()))) {
+            JOptionPane.showMessageDialog(null, "Incorrect password ");
+            return false;
+        } //if no is selected
+        else if (imagePth == null) {
+
+            JOptionPane.showMessageDialog(null, "No Image selected");
+            return false;
+        } //else everything is ok
+        else {
+            return true;
         }
-        
-        //if passwords are different
-    else if(!String.valueOf(jPasswordField2.getPassword()).equals(String.valueOf(jPasswordField5.getPassword()))){
-        JOptionPane.showMessageDialog(null, "Incorrect password ");
-        return false;
+
     }
-        
-    //if no is selected
-    else if(imagePth == null){
-        
-        JOptionPane.showMessageDialog(null, "No Image selected");
-        return false;
-    }
-    
-    //else everything is ok
-    else{
-        return true;
-    } 
-        
-}
-    
+
     private void jButtonLoginCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoginCreateActionPerformed
-       
-       if(verifData()){
-           
-           Connection con = MyConnection.getConnection();
-        PreparedStatement ps;
-        
-        try {
- 
-          
-          ps = con.prepareStatement("INSERT INTO `user`(`fname`, `lname`, `username`, `pass`, `pic`) VALUES (?,?,?,?,?)");
-            
-            ps.setString(1,jTextFieldFName.getText());
-            ps.setString(2,jTextFieldLName.getText());
-            ps.setString(3,jTextFieldUsername1.getText());
-            ps.setString(4,String.valueOf(jPasswordField2.getPassword()));
-            
-            InputStream img = new FileInputStream(new File(imagePth));
-            
-            ps.setBlob(5, img);
-            
-            if(ps.executeUpdate() !=0){
-                JOptionPane.showMessageDialog(null, "Account created");
-            }else{
-               JOptionPane.showMessageDialog(null, "Something Wrong"); 
+
+        if (verifData()) {
+
+            Connection con = MyConnection.getConnection();
+            PreparedStatement ps;
+
+            try {
+
+                ps = con.prepareStatement("INSERT INTO `user`(`fname`, `lname`, `username`, `pass`, `pic`) VALUES (?,?,?,?,?)");
+
+                ps.setString(1, jTextFieldFName.getText());
+                ps.setString(2, jTextFieldLName.getText());
+                ps.setString(3, jTextFieldUsername1.getText());
+                ps.setString(4, String.valueOf(jPasswordField2.getPassword()));
+
+                InputStream img = new FileInputStream(new File(imagePth));
+
+                ps.setBlob(5, img);
+
+                if (isUsernameExist(jTextFieldUsername1.getText())) {
+
+                    JOptionPane.showMessageDialog(null, "Username Already Exists");
+                } else {
+                    if (ps.executeUpdate() != 0) {
+                        JOptionPane.showMessageDialog(null, "Account Created");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Something Wrong");
+                    }
+
+                }
+
+            } catch (Exception ex) {
+                Logger.getLogger(SignUpForm.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (Exception ex) {
-            Logger.getLogger(SignUpForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-       } 
-        
+
     }//GEN-LAST:event_jButtonLoginCreateActionPerformed
 
     private void jButtonCancel1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancel1ActionPerformed
