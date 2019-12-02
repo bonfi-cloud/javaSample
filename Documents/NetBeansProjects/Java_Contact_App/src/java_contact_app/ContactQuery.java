@@ -48,7 +48,7 @@ public class ContactQuery {
     
     //Créer une liste de contacts
     
-    public ArrayList<Contact> contatctList(){
+    public ArrayList<Contact> contatctList(int userId){
         
         ArrayList<Contact> clist = new ArrayList<>();
         Connection con = MyConnection.getConnection();
@@ -57,7 +57,7 @@ public class ContactQuery {
         
         try {
             st = con.createStatement();
-            rs = st.executeQuery("SELECT `id`, `fname`, `lname`, `groupc`, `phone`, `email`, `adress`, `pic` FROM `mycontacts` WHERE 1");
+            rs = st.executeQuery("SELECT `id`, `fname`, `lname`, `groupc`, `phone`, `email`, `adress`, `pic` FROM `mycontacts` WHERE userId="+userId);
             
                Contact ct;
         

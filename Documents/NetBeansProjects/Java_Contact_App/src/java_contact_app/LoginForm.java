@@ -262,12 +262,27 @@ public class LoginForm extends javax.swing.JFrame {
         ResultSet rs;
         
         try {
-            ps = con.prepareStatement("SELECT * FROM `user` WHERE `username` = ? and `pass` = ?");
+            ps = con.prepareStatement("SELECT `username`, `pass`, `pic`,id FROM `user` WHERE `username` = ? and `pass` = ?");
             ps.setString(1, jTextFieldUsername.getText());
             ps.setString(2,String.valueOf(jPasswordField1.getPassword()));
             rs = ps.executeQuery();
+            
             if(rs.next()){
-                JOptionPane.showMessageDialog(null, "you are logged");
+                    //Obtenir l'ID de l'utilisateur actuel
+                    MyContactsForm.currentUserId = rs.getInt("id");
+                    System.out.println(rs.getInt("id")+"From Login");
+                    MyContactsForm mcf = new MyContactsForm();
+                    mcf.setVisible(true);
+                    mcf.pack();
+                    mcf.setLocationRelativeTo(null);
+                    mcf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    
+                    //Afficher la photo de profil de l'utilisateur en haut du formulaire
+                    mcf.jLabelUserPic.setIcon(new MyFunc().resizePic(null, rs.getBytes(3), mcf.jLabelUserPic.getWidth(), mcf.jLabelUserPic.getHeight()));
+                    mcf.jLabelUsername.setText(rs.getString(1));
+                    //this.hide();
+                    this.dispose();
+                
             }else{
                 JOptionPane.showMessageDialog(null, "login error");
             }

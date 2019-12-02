@@ -17,9 +17,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author Aboubcar Doumbouya
  */
 public class MyFunc {
-    public ImageIcon resizePic(String picPath,int wdth,int hgt) {
-
-        ImageIcon myIm = new ImageIcon(picPath);
+    public ImageIcon resizePic(String picPath,byte [] BLOBpic,int wdth,int hgt) {
+        
+        ImageIcon myIm;
+        if(picPath !=null){
+             myIm = new ImageIcon(picPath);
+        }else{
+            myIm = new ImageIcon(BLOBpic);
+        }
+        
         Image img = myIm.getImage().getScaledInstance(wdth, hgt, Image.SCALE_SMOOTH);
         ImageIcon myPicture = new ImageIcon(img);
         return myPicture;
@@ -48,7 +54,7 @@ public class MyFunc {
             // jLabelPic.setIcon(new ImageIcon(path));
 
             //display the image in the JLabel using resize image
-            lbl.setIcon(resizePic(path,lbl.getWidth(),lbl.getHeight()));
+            lbl.setIcon(resizePic(path,null,lbl.getWidth(),lbl.getHeight()));
 
         } // if the user cancel
         else if (fileState == JFileChooser.CANCEL_OPTION) {
